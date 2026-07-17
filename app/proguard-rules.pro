@@ -1,1 +1,2 @@
-
+-keep class com.example.cine.data.** { *; }
+-keepattributes *Annotation*, Signature
