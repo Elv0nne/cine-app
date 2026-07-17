@@ -1,29 +1,29 @@
 package com.example.cine.ui.components
 
-import android.app. Activity
-import android.content.pm. ActivityInfo
-import android.view. ViewGroup
+import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout. Box
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
-import androidx.compose.ui. Modifier
-import androidx.compose.ui.graphics. Color
-import androidx.compose.ui.platform. LocalContext
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop. AndroidView
-import androidx.compose.ui.window. Dialog
-import androidx.compose.ui.window. DialogProperties
-import androidx.core.view. WindowCompat
-import androidx.core.view. WindowInsetsCompat
-import androidx.media3.common. MediaItem
-import androidx.media3.common.util. UnstableApi
-import androidx.media3.exoplayer. ExoPlayer
-import androidx.media3.ui. PlayerView
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 
-@androidx.annotation. OptIn(UnstableApi::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun PlayerBox(
     url: String,
@@ -34,7 +34,7 @@ fun PlayerBox(
     var isFullscreen by remember { mutableStateOf(false) }
 
     val player = remember(url) {
-        ExoPlayer. Builder(ctx).build().apply {
+        ExoPlayer.Builder(ctx).build().apply {
             setMediaItem(MediaItem.fromUri(url))
             prepare()
             if (startPositionMs > 0) seekTo(startPositionMs)
@@ -74,11 +74,11 @@ fun PlayerBox(
         val a = activity ?: return@LaunchedEffect
         val controller = WindowCompat.getInsetsController(a.window, a.window.decorView)
         if (isFullscreen) {
-            a.requestedOrientation = ActivityInfo. SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            controller.hide(WindowInsetsCompat. Type.systemBars())
+            a.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
         } else {
-            a.requestedOrientation = ActivityInfo. SCREEN_ORIENTATION_PORTRAIT
-            controller.show(WindowInsetsCompat. Type.systemBars())
+            a.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            controller.show(WindowInsetsCompat.Type.systemBars())
         }
     }
 
@@ -88,7 +88,7 @@ fun PlayerBox(
             onDismissRequest = { isFullscreen = false }, // bấm Back sẽ thoát fullscreen
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Box(Modifier.fillMaxSize().background(Color. Black)) {
+            Box(Modifier.fillMaxSize().background(Color.Black)) {
                 AndroidView(
                     factory = {
                         // gỡ khỏi cha cũ trước khi gắn lại (tránh crash "already has a parent")
