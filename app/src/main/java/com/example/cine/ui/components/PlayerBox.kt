@@ -2,7 +2,6 @@ package com.example.cine.ui.components
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,14 +41,30 @@ fun PlayerBox(
         }
     }
 
-    // Chỉ tạo MỘT PlayerView và tái sử dụng cho cả inline lẫn fullscreen
-    val playerView = remember {
+    // 2 PlayerView riêng, dùng chung 1 ExoPlayer
+    val inlineView = remember {
         PlayerView(ctx).apply {
-            this.player = player
             setShowNextButton(false)
             setShowPreviousButton(false)
-            // Bấm nút fullscreen -> đảo trạng thái
-            setFullscreenButtonClickListener { isFullscreen = !isFullscreen }
+            player = null
+            setFullscreenButtonClickListener { isFullscreen = true }
+        }
+    }
+    val fullscreenView = remember {
+        PlayerView(ctx).apply {
+            setShowNextButton(false)
+            setShowPreviousButton(false)
+            player = null
+            setFullscreenButtonClickListener { isFullscreen = false }
+        }
+    }
+
+    // Chuyển player sang đúng view đang hiển thị (không reparent view)
+    LaunchedEffect(isFullscreen) {
+        if (isFullscreen) {
+            PlayerView.switchTargetView(player, inlineView, fullscreenView)
+        } else {
+            PlayerView.switchTargetView(player, fullscreenView, inlineView)
         }
     }
 
@@ -64,11 +79,13 @@ fun PlayerBox(
     DisposableEffect(url) {
         onDispose {
             if (player.duration > 0) onProgress(player.currentPosition, player.duration)
+            inlineView.player = null
+            fullscreenView.player = null
             player.release()
         }
     }
 
-    // Xoay ngang + ẩn/hiện thanh hệ thống theo trạng thái fullscreen
+    // Xoay ngang + ẩn/hiện thanh hệ thống
     val activity = ctx as? Activity
     LaunchedEffect(isFullscreen) {
         val a = activity ?: return@LaunchedEffect
@@ -82,30 +99,24 @@ fun PlayerBox(
         }
     }
 
+    // Player inline luôn nằm trong layout
+    AndroidView(
+        factory = { inlineView },
+        modifier = Modifier.fillMaxWidth().height(230.dp)
+    )
+
+    // Fullscreen: Dialog phủ toàn màn hình, chứa fullscreenView
     if (isFullscreen) {
-        // Trình phát phủ TOÀN màn hình trong Dialog
         Dialog(
-            onDismissRequest = { isFullscreen = false }, // bấm Back sẽ thoát fullscreen
+            onDismissRequest = { isFullscreen = false }, // bấm Back thoát fullscreen
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(Modifier.fillMaxSize().background(Color.Black)) {
                 AndroidView(
-                    factory = {
-                        // gỡ khỏi cha cũ trước khi gắn lại (tránh crash "already has a parent")
-                        (playerView.parent as? ViewGroup)?.removeView(playerView)
-                        playerView
-                    },
+                    factory = { fullscreenView },
                     modifier = Modifier.fillMaxSize()
                 )
             }
         }
-    } else {
-        AndroidView(
-            factory = {
-                (playerView.parent as? ViewGroup)?.removeView(playerView)
-                playerView
-            },
-            modifier = Modifier.fillMaxWidth().height(230.dp)
-        )
     }
 }
